@@ -14,6 +14,7 @@ FROM bash:5
 RUN set -ex \
  && apk --no-cache add \
       coreutils \
+      curl \
       grep \
       openssh \
       rsync
