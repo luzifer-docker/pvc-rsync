@@ -18,6 +18,7 @@ function cleanup_old_backups() {
   info "Starting cleanup of backups..."
 
   for backup in $(ssh "${REMOTE_HOST}" -- ls "${BASE_DIR}" | grep -v "${LATEST_LINK}" | sort | head --lines=-${KEEP_LAST_N}); do
+    info "Removing backup ${backup}..."
     ssh "${REMOTE_HOST}" -- rm -rf "${BASE_DIR}/${backup}" || {
       error "Failed to delete backup ${backup}"
       return 1
