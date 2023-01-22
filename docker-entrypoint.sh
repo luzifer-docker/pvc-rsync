@@ -10,6 +10,9 @@ set -euo pipefail
 : ${LOCAL_DIR:=/data}               # Where to find the data to backup
 : ${NAME_SCHEMA:=%Y-%m-%d_%H-%M-%S} # How to name backup dirs, make sure to make it sortable when using KEEP_LAST_N, do not use spaces
 : ${ONESHOT:=false}                 # Run only once (backup only), set INTERVAL to 1 to execute directly on start
+: ${PING_DOWN:=}                    # Send a ping (HTTP GET) to this URL when an exit-error ocurred
+: ${PING_MAX_TIME:=5}               # Time in seconds to timeout the ping request
+: ${PING_UP:=}                      # Send a ping (HTTP GET) to this URL when backup finished successfully
 : ${REMOTE_HOST:=}                  # Where to send the backups
 : ${SKIP_RESTORE_ON:=}              # File to check, if exists restore will be skipped
 : ${SSH_CONFIG_MOUNT:=~/.ssh-dist}  # Where to search for ~/.ssh contents to copy into ~/.ssh (Secret mountPath)
@@ -42,6 +45,10 @@ function error() {
 }
 
 function exit_error() {
+  if [[ -n $PING_DOWN ]]; then
+    curl -sS -m ${PING_MAX_TIME} -o /dev/null "${PING_DOWN}"
+  fi
+
   if [[ $EXIT_ON_ERROR == true ]]; then
     fatal "$@"
     return 0
@@ -160,6 +167,10 @@ function run_backup() {
     error "Failed to create latest link."
     return 1
   }
+
+  if [[ -n $PING_UP ]]; then
+    curl -sS -m ${PING_MAX_TIME} -o /dev/null "${PING_UP}"
+  fi
 
   info "Backup finished."
 }
