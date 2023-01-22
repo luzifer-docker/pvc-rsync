@@ -24,6 +24,8 @@ function cleanup_old_backups() {
       return 1
     }
   done
+
+  info "Cleanup finished."
 }
 
 function ensure_basedir() {
