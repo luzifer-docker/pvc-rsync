@@ -60,7 +60,10 @@ function import_ssh_dir() {
     return 1
   }
 
-  rsync -a "${SSH_CONFIG_MOUNT}/" ~/.ssh/
+  local sync_src="${SSH_CONFIG_MOUNT}"
+  [[ -e $SSH_CONFIG_MOUNT/..data ]] && sync_src="${SSH_CONFIG_MOUNT}/..data" || true
+
+  rsync -a "${sync_src}/" ~/.ssh/
   chown $(id -u) ~/.ssh/*
   chmod 0600 ~/.ssh/*
 }
