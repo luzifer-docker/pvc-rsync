@@ -82,7 +82,7 @@ function link_latest() {
   local link="$2"
 
   if [[ $HETZNER_WORKAROUND == true ]]; then
-    echo -e "rm ${link}\nsymlink ${dest} ${link}" | sftp "${REMOTE_HOST}" && return 0 || {
+    echo -e "rm ${link}\nsymlink ${dest} ${link}" | sftp -q "${REMOTE_HOST}" && return 0 || {
       error "Renewing latest-link (sftp)."
       return 1
     }
