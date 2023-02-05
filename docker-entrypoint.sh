@@ -2,6 +2,7 @@
 set -euo pipefail
 
 : ${BASE_DIR:=.}                    # Where to create the backup dir
+: ${EXCLUDES_FILE:=}                # File containing exclude globs
 : ${EXIT_ON_ERROR:=false}           # Exit on backup error (default keep running)
 : ${HETZNER_WORKAROUND:=false}      # Hetzner StorageBox needs sftp for symlinks
 : ${INTERVAL:=3600}                 # When to backup (3600 = *:00, 1800 = *:00,30)
@@ -155,9 +156,14 @@ function run_backup() {
   }
 
   info "Synchronizing backup..."
+  extra_params=()
+
+  [[ -z $EXCLUDES_FILE ]] || extra_params+=("--exclude-from=${EXCLUDES_FILE}")
+
   rsync -av --delete \
     "${LOCAL_DIR}/" \
     --link-dest "../${LATEST_LINK}/" \
+    "${extra_params[@]}" \
     "${REMOTE_HOST}:${dest}/" || {
     error "Failed to sync backup-dir."
     return 1
