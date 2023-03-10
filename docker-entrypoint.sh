@@ -14,6 +14,7 @@ set -euo pipefail
 : ${PING_DOWN:=}                    # Send a ping (HTTP GET) to this URL when an exit-error ocurred
 : ${PING_MAX_TIME:=5}               # Time in seconds to timeout the ping request
 : ${PING_UP:=}                      # Send a ping (HTTP GET) to this URL when backup finished successfully
+: ${PRE_CMD:=}                      # Execute command before backing up (i.e. script to backup sqlite db)
 : ${REMOTE_HOST:=}                  # Where to send the backups
 : ${SKIP_RESTORE_ON:=}              # File to check, if exists restore will be skipped
 : ${SSH_CONFIG_MOUNT:=~/.ssh-dist}  # Where to search for ~/.ssh contents to copy into ~/.ssh (Secret mountPath)
@@ -149,6 +150,14 @@ function run_backup() {
   local link="${BASE_DIR}/${LATEST_LINK}"
 
   info "Starting backup..."
+
+  [[ -z $PRE_CMD ]] || {
+    info "Running pre-command '${PRE_CMD}'..."
+    ${PRE_CMD} || {
+      error "Failed to run pre-command."
+      return 1
+    }
+  }
 
   ensure_basedir || {
     error "Failed to ensure base-dir."
