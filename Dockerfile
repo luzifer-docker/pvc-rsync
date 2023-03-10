@@ -17,7 +17,8 @@ RUN set -ex \
       curl \
       grep \
       openssh \
-      rsync
+      rsync \
+      sqlite
 
 COPY --from=prefetch  /dumb-init            /usr/local/bin/
 COPY                  docker-entrypoint.sh  /usr/local/bin/
